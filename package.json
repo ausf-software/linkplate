@@ -1,0 +1,65 @@
+{
+  "name": "linkplate",
+  "version": "0.0.1",
+  "description": "Static sites without duplicated markup: real multi-page URLs, one shared template, fetch-loaded components, reactive bindings - and no build step.",
+  "type": "module",
+
+  "exports": {
+    ".": {
+      "browser": "./dist/linkplate.esm.js",
+      "import": "./src/runtime/index.js",
+      "default": "./src/runtime/index.js"
+    },
+    "./runtime": {
+      "browser": "./dist/linkplate.esm.js",
+      "default": "./src/runtime/index.js"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+
+  "unpkg": "./dist/linkplate.min.js",
+  "jsdelivr": "./dist/linkplate.min.js",
+
+  "sideEffects": false,
+
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "test": "node --test",
+    "prepublishOnly": "npm run build && npm test"
+  },
+
+  "keywords": [
+    "linkplate",
+    "static-site",
+    "runtime"
+  ],
+
+  "license": "MIT",
+  "author": "Daniil Scherbina",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ausf-software/linkplate.git"
+  },
+  "bugs": { "url": "https://github.com/ausf-software/linkplate/issues" },
+  "homepage": "https://github.com/ausf-software/linkplate#readme",
+
+  "engines": {
+    "node": ">=18"
+  },
+
+  "publishConfig": {
+    "access": "public"
+  },
+
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}
