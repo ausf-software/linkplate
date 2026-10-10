@@ -53,6 +53,7 @@ export function hslToHex(h, s, l) {
   const g = Math.round((g1 + m) * 255);
   const b = Math.round((b1 + m) * 255);
 
+  /** @type {(n: number) => string} */
   const toHex = (n) => n.toString(16).padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }

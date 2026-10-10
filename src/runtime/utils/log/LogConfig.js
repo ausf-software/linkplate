@@ -34,6 +34,7 @@ export class LogConfig {
   /** @type {string} */
   static STORAGE_KEY = FrameworkConstants.STORAGE_PREFIX + 'log_config';
 
+  /** @type {boolean} */
   #enabled;
 
   /** @type {LogLevel} */
@@ -42,10 +43,19 @@ export class LogConfig {
   /** @type {Set<string>} */
   #namespaces;
 
+  /** @type {boolean} */
   #persist;
+
+  /** @type {boolean} */
   #colorize;
 
-  constructor() { this.reset(); }
+  constructor() {
+    this.#enabled = LogConfig.DEFAULT_ENABLED;
+    this.#level = LogConfig.DEFAULT_LEVEL;
+    this.#namespaces = new Set(LogConfig.DEFAULT_NAMESPACES);
+    this.#persist = LogConfig.DEFAULT_PERSIST;
+    this.#colorize = LogConfig.DEFAULT_COLORIZE;
+  }
 
   /**
    * Resets all settings back to their default values.
