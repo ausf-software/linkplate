@@ -23,7 +23,7 @@ export class LocalStorageManager {
   #logger;
 
   /**
-   * @type {Storage|null}
+   * @type {Storage}
    */
   #storage;
 
@@ -42,8 +42,10 @@ export class LocalStorageManager {
     if (!logger) {
       throw new Error('LocalStorageManager: logger is required');
     }
-    this.#logger    = logger;
-    this.#storage   = this.#detectStorage();
+    this.#logger = logger;
+    
+    const detected = this.#detectStorage();
+    this.#storage = /** @type {Storage} */ (detected);
     this.#available = this.#storage !== null;
 
     if (this.#available) {
@@ -56,14 +58,17 @@ export class LocalStorageManager {
   /**
    * Detects whether "localStorage" is available and writable.
    *
-   * @private
    * @returns {Storage|null} The storage instance, or null if unavailable.
    */
   #detectStorage() {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined')
+      return null;
+    
     try {
       const store = window.localStorage;
+
       if (!store) return null;
+
       const probe = '__lp_probe__';
       store.setItem(probe, '1');
       store.removeItem(probe);
@@ -76,7 +81,6 @@ export class LocalStorageManager {
   /**
    * Builds the full storage key by applying the framework prefix.
    *
-   * @private
    * @param {string} key - User key.
    * @returns {string} Prefixed storage key.
    */
