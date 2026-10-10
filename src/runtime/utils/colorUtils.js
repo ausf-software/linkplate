@@ -1,4 +1,13 @@
 /**
+ * @file Color utility functions.
+ *
+ * Provides small, dependency-free helpers for converting between color
+ * representations.
+ *
+ * @module ColorUtils
+ */
+
+/**
  * HSL → RGB → hex.
  *
  * @param {number} h hue, 0..359

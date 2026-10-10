@@ -1,4 +1,12 @@
 /**
+ * @file String utility functions.
+ *
+ * Provides small, dependency-free helpers for working with strings.
+ *
+ * @module StringUtils
+ */
+
+/**
  * 32-bit signed hash of a string.
  *
  * @param {string} s
