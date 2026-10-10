@@ -1,61 +1,164 @@
-// TODO: реализовать
+/**
+ * @file Namespaced console logger.
+ *
+ * @module Logger
+ */
 
+import { LogLevel } from './LogLevel.js';
+import { formatPrefix, buildStyleArgs } from '../format/LogFormatter.js';
+
+/**
+ * @typedef {import('./LogManager.js').LogManager} LogManager
+ */
+
+/**
+ * Logger bound to a single namespace.
+ */
 export class Logger {
-  /**
-   * идея такая: есть некоторый менеджер который управляет видимостью логов
-   * в зависимости от его пространства имен (т.е. например чтобы скрыть логи 
-   * идущие от хранилища но показать остальные). ну т.е. должны быть проверки
-   * что у каждого созданного логгера уникальное пространство имен
-   */
-  constructor(gate, namespace) {}
 
-  getNamespace() {}
+  /** @type {LogManager} */
+  #gate;
 
-  /**
-   * доступен ли уровень логгирования для данного логгера
-   */
-  isActive(level) {}
+  /** @type {string} */
+  #namespace;
 
-  error(...args) {}
-
-  warn(...args) {}
-
-  info(...args) {}
-
-  debug(...args) {}
-
-  trace(...args) {}
+  /** @type {string} */
+  #color;
 
   /**
-   * открывает группу в консоли для группировки логов
+   * @param {LogManager} gate - Log manager controlling activity and formatting.
+   * @param {string} namespace - Namespace name.
+   * @param {string} color - Namespace color.
    */
-  group(label) {}
+  constructor(gate, namespace, color) {
+    this.#gate = gate;
+    this.#namespace = String(namespace || 'app');
+    this.#color = color;
+  }
+
+  /** @returns {string} */
+  getNamespace() { return this.#namespace; }
 
   /**
-   * открывает свернутую группу в консоли для группировки логов
+   * @param {LogLevel} [level=LogLevel.TRACE]
+   * @returns {boolean}
    */
-  groupCollapsed(label) {}
-
-  groupEnd() {}
-
-  /**
-   * печатает отформатированную таблицу в консоль
-   */
-  table(data, columns) {}
+  isActive(level = LogLevel.TRACE) {
+    return this.#gate.isActive(this.#namespace, LogLevel.of(level));
+  }
 
   /**
-   * запускает таймер. метки для различимости в рамках одного логгера
+   * Formats arguments with namespace prefix and color.
+   * @param {*[]} args
+   * @returns {*[]}
    */
-  time(label) {}
+  #formatArgs(args) {
+    const colorize = this.#gate.isColorize();
+    return [
+      formatPrefix(this.#namespace, colorize),
+      ...buildStyleArgs(this.#color, colorize),
+      ...args
+    ];
+  }
 
   /**
-   * останавливает таймер и выводит результат в консоль
-   * (метки должны совпадать)
+   * Emits a log entry if the level is active.
+   * @param {LogLevel} level
+   * @param {*[]} args
+   * @returns {void}
    */
-  timeEnd(label) {}
+  #emit(level, args) {
+    if (!this.#gate.isActive(this.#namespace, level)) return;
+
+    const method = level.consoleMethod;
+    if (!method) return;
+
+    /** @type {(...data: any[]) => void} */
+    const fn = console[method];
+    fn(...this.#formatArgs(args));
+  }
+
+  /** @param {...*} args @returns {void} */
+  error(...args) { this.#emit(LogLevel.ERROR, args); }
+
+  /** @param {...*} args @returns {void} */
+  warn(...args) { this.#emit(LogLevel.WARN,  args); }
+
+  /** @param {...*} args @returns {void} */
+  info(...args) { this.#emit(LogLevel.INFO,  args); }
+
+  /** @param {...*} args @returns {void} */
+  debug(...args) { this.#emit(LogLevel.DEBUG, args); }
+
+  /** @param {...*} args @returns {void} */
+  trace(...args) { this.#emit(LogLevel.TRACE, args); }
+
+  /** @param {string} label @returns {void} */
+  group(label) { this.#openGroup('group', label); }
+
+  /** @param {string} label @returns {void} */
+  groupCollapsed(label) { this.#openGroup('groupCollapsed', label); }
 
   /**
-   * выполняет функцию и выводит в консоль ее время выполнения
+   * @param {'group'|'groupCollapsed'} method
+   * @param {string} label
+   * @returns {void}
    */
-  timeIt(label, fn) {}
+  #openGroup(method, label) {
+    if (!this.#gate.isActive(this.#namespace, LogLevel.DEBUG))
+      return;
+    console[method](...this.#formatArgs([label]));
+  }
+
+  /** @returns {void} */
+  groupEnd() {
+    if (!this.#gate.isActive(this.#namespace, LogLevel.DEBUG))
+      return;
+    console.groupEnd();
+  }
+
+  /**
+   * @param {*} data
+   * @param {string[]} [columns]
+   * @returns {void}
+   */
+  table(data, columns) {
+    if (!this.#gate.isActive(this.#namespace, LogLevel.DEBUG)) return;
+    console.log(...this.#formatArgs([]));
+    console.table(data, columns);
+  }
+
+  /** @param {string} label @returns {void} */
+  time(label) {
+    if (!this.#gate.isActive(this.#namespace, LogLevel.TRACE))
+      return;
+    console.time(`${this.#namespace}:${label}`);
+  }
+
+  /** @param {string} label @returns {void} */
+  timeEnd(label) {
+    if (!this.#gate.isActive(this.#namespace, LogLevel.TRACE))
+      return;
+    console.timeEnd(`${this.#namespace}:${label}`);
+  }
+
+  /**
+   * Times a function and logs the elapsed time.
+   * @template T
+   * @param {string} label - Label for the timing output.
+   * @param {() => T} fn - Function to execute.
+   * @returns {T} Function result.
+   */
+  timeIt(label, fn) {
+    if (!this.#gate.isActive(this.#namespace, LogLevel.TRACE))
+      return fn();
+
+    const start = performance.now();
+    try {
+      return fn();
+    } finally {
+      const ms = (performance.now() - start).toFixed(2);
+      console.log(...this.#formatArgs([`${label}: ${ms}ms`]));
+    }
+  }
 }

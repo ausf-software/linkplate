@@ -45,7 +45,7 @@ export class LogLevel {
   /**
    * @param {string} name - Lowercase level name.
    * @param {number} severity - Numeric severity (0 = most severe).
-   * @param {string|null} consoleMethod - Console method name, or null to suppress.
+   * @param {keyof Console|null} consoleMethod - Console method name, or null to suppress.
    */
   constructor(name, severity, consoleMethod) {
     this.#name = name;
@@ -60,7 +60,7 @@ export class LogLevel {
   /** @returns {number} Numeric severity. */
   get severity() { return this.#severity; }
 
-  /** @returns {string|null} Console method name, or `null`. */
+  /** @returns {keyof Console|null} Console method name, or null. */
   get consoleMethod() { return this.#consoleMethod; }
 
   /**
@@ -100,7 +100,7 @@ export class LogLevel {
    * @returns {LogLevel}
    */
   static fromName(name) {
-    if (typeof name !== 'string') 
+    if (typeof name !== 'string')
       return LogLevel.DEBUG;
     return LogLevel.#byName.get(name.toLowerCase()) ?? LogLevel.DEBUG;
   }
