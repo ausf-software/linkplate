@@ -1,14 +1,11 @@
 /**
  * @file Color utility functions.
  *
- * Provides small, dependency-free helpers for converting between color
- * representations.
- *
  * @module ColorUtils
  */
 
 /**
- * HSL → RGB → hex.
+ * HSL -> RGB -> hex.
  *
  * @param {number} h hue, 0..359
  * @param {number} s saturation, 0..1
@@ -56,4 +53,50 @@ export function hslToHex(h, s, l) {
   /** @type {(n: number) => string} */
   const toHex = (n) => n.toString(16).padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+/**
+ * Generic memoized mapper: key to value.
+ *
+ * Caches the result of a user-provided derive function per key.
+ *
+ * @template K
+ * @template V
+ */
+export class Palette {
+  
+  /** @type {Map<K, V>} */
+  #cache = new Map();
+
+  /** @type {(key: K) => V} */
+  #derive;
+
+  /**
+   * @param {(key: K) => V} derive
+   */
+  constructor(derive) {
+    if (typeof derive !== 'function') {
+      throw new Error('Palette: derive must be a function');
+    }
+    this.#derive = derive;
+  }
+
+  /**
+   * @param {K} key
+   * @returns {V}
+   */
+  colorFor(key) {
+    let color = this.#cache.get(key);
+    if (color === undefined) {
+      color = this.#derive(key);
+      this.#cache.set(key, color);
+    }
+    return color;
+  }
+
+  /** @returns {void} */
+  clear() { this.#cache.clear(); }
+
+  /** @returns {number} */
+  get size() { return this.#cache.size; }
 }
