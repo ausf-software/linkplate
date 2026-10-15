@@ -36,3 +36,33 @@ export function buildStyleArgs(color, colorize) {
     'color:inherit'
   ];
 }
+
+/**
+ * Builds a namespace string from a sequence of path segments.
+ *
+ * @param {...string} segments - Path parts describing the source module.
+ * @returns {string} Normalized namespace, e.g. "utils/MyUtils".
+ * @throws {TypeError} If any segment is not a string.
+ */
+export function nsFrom(...segments) {
+  if (segments.length === 0) return '';
+
+  const parts = [];
+  for (const seg of segments) {
+    if (typeof seg !== 'string') {
+      throw new TypeError('nsFrom: every segment must be a string');
+    }
+    for (const piece of seg.split('/')) {
+      const cleaned = piece.replace(/^\/+|\/+$/g, '');
+      if (cleaned) parts.push(cleaned);
+    }
+  }
+
+  if (parts.length === 0) return '';
+
+  const last = parts.length - 1;
+  parts[last] = parts[last].replace(/\.(m?js|ts|jsx|tsx)$/, '');
+  if (parts[last] === 'index' && parts.length > 1) parts.pop();
+
+  return parts.join('/');
+}

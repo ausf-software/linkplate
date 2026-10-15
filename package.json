@@ -7,12 +7,12 @@
   "exports": {
     ".": {
       "browser": "./dist/linkplate.esm.js",
-      "import": "./src/runtime/index.js",
-      "default": "./src/runtime/index.js"
+      "import": "./src/index.js",
+      "default": "./src/index.js"
     },
     "./runtime": {
       "browser": "./dist/linkplate.esm.js",
-      "default": "./src/runtime/index.js"
+      "default": "./src/index.js"
     },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
